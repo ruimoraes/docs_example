@@ -28,7 +28,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/seu-usuario/meu-site-docusaurus.git
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/ruimoraes/docs_example.git
 
       - name: Deploy para GitHub Pages
         run: npm run deploy
