@@ -47,7 +47,6 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global --add safe.directory $(pwd)
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Configurar Node.js
@@ -74,12 +73,23 @@ jobs:
     if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar autenticação no GitHub
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
       - name: Criar Pull Request via API do GitHub
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          cd "$(git rev-parse --show-toplevel)"
           BRANCH_NAME="${{ github.ref_name }}"
           PR_TITLE="🚀 Novo PR - Atualização na branch '${BRANCH_NAME}'"
           PR_BODY="Uma nova atualização foi enviada para '${BRANCH_NAME}' e passou na validação.\n\nPara aplicar as mudanças na 'main', revise e aprove este Pull Request."
-
           gh pr create --base main --head "$BRANCH_NAME" --title "$PR_TITLE" --body "$PR_BODY" --draft
