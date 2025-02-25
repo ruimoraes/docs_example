@@ -21,14 +21,15 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
-      - name: Realizar o build do site
+      - name: Construir o site
         run: npm run build
 
-      - name: Deploy para GitHub Pages
-        env:
-          GIT_USER: ${{ secrets.GITHUB_TOKEN }}
+      - name: Configurar autenticação no GitHub
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          npm run deploy
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/seu-usuario/meu-site-docusaurus.git
+
+      - name: Deploy para GitHub Pages
+        run: npm run deploy
 
