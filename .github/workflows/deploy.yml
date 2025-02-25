@@ -40,6 +40,17 @@ jobs:
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
+        with:
+          fetch-dept: 0
+
+      - name: Verificar o repositorio remoto
+        run: git remote -v
+
+      - name: Configurar autenticação no GitHub
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
@@ -52,12 +63,6 @@ jobs:
 
       - name: Construir o site
         run: npm run build
-
-      - name: Configurar autenticação no GitHub
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Deploy para GitHub Pages
         env:
