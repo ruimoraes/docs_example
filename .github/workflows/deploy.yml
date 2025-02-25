@@ -1,17 +1,14 @@
-name: Validate and Deploy Github Pages
+name: Validate and Deploy Docusaurus
 
 on:
-  pull_request:
-    branches:
-      - main
   push:
-    branches:
-      - main
+  pull_request:
 
 permissions:
   contents: write
   pages: write
   id-token: write
+  pull-requests: write
 
 jobs:
   validate:
@@ -33,36 +30,21 @@ jobs:
       - name: Verificar se o build está correto
         run: npm run build
 
-  deploy:
-    name: Deploy para GitHub Pages
+  suggest_pull_request:
+    name: Sugerir Pull Request
     needs: validate
-    if: github.ref == 'refs/heads/main'
+    if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout do código
-        uses: actions/checkout@v4
-
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
+      - name: Criar Pull Request automático
+        uses: peter-evans/create-pull-request@v6
         with:
-          node-version: 18
-          cache: 'npm'
-
-      - name: Instalar dependências
-        run: npm ci
-
-      - name: Construir o site
-        run: npm run build
-
-      - name: Configurar autenticação no GitHub
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-
-      - name: Deploy para GitHub Pages
-        env:
-          GIT_USER: "x-access-token:${{ secrets.GITHUB_TOKEN }}"
-          USE_SSH: false
-        run: npm run deploy
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
+          branch: ${{ github.ref_name }}
+          title: "🚀 Novo PR - Atualização na branch `${{ github.ref_name }}`"
+          body: |
+            Uma nova atualização foi enviada para `${{ github.ref_name }}` e passou na validação.
+            Para aplicar as mudanças na `main`, revise e aprove este Pull Request.
+          draft: true
 
