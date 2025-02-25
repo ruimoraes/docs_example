@@ -33,7 +33,7 @@ jobs:
 
       - name: Deploy para GitHub Pages
         env:
-          GIT_USER: ${{ github.actor }}  # Define o usuário automaticamente
+          GIT_USER: "x-access-token:${{ secrets.GITHUB_TOKEN }}"
           USE_SSH: false  # Garante que o deploy não tente usar SSH
         run: |
           npm run deploy
