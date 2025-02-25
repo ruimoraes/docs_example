@@ -1,18 +1,41 @@
 name: Validate and Deploy Docusaurus
 
 on:
-  push:
-  pull_request:
+  push:  # Valida todo commit enviado ao repositório
+  pull_request:  # Valida mudanças em Pull Requests
 
 permissions:
   contents: write
   pages: write
   id-token: write
-  pull-requests: write
+  pull-requests: write  # Permite criar PRs automaticamente
 
 jobs:
   validate:
     name: Validate Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Clona todo o histórico para evitar erros
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Verificar se o build está correto
+        run: npm run build
+
+  deploy:
+    name: Deploy para GitHub Pages
+    needs: validate  # Só executa se o build for bem-sucedido
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do código
@@ -27,13 +50,25 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
-      - name: Verificar se o build está correto
+      - name: Construir o site
         run: npm run build
+
+      - name: Configurar autenticação no GitHub
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
+      - name: Deploy para GitHub Pages
+        env:
+          GIT_USER: "x-access-token:${{ secrets.GITHUB_TOKEN }}"
+          USE_SSH: false
+        run: npm run deploy
 
   suggest_pull_request:
     name: Sugerir Pull Request
-    needs: validate
-    if: github.ref != 'refs/heads/main'
+    needs: validate  # Só executa se a validação passar
+    if: github.ref != 'refs/heads/main'  # Somente para branches diferentes de 'main'
     runs-on: ubuntu-latest
     steps:
       - name: Criar Pull Request automático
@@ -46,5 +81,5 @@ jobs:
           body: |
             Uma nova atualização foi enviada para `${{ github.ref_name }}` e passou na validação.
             Para aplicar as mudanças na `main`, revise e aprove este Pull Request.
-          draft: true
+          draft: true  # PR será criado como rascunho
 
