@@ -1,14 +1,14 @@
 name: Validate and Deploy Docusaurus
 
 on:
-  push:  # Valida todo commit enviado ao repositório
-  pull_request:  # Valida mudanças em Pull Requests
+  push:
+  pull_request:
 
 permissions:
   contents: write
   pages: write
   id-token: write
-  pull-requests: write  # Permite criar PRs automaticamente
+  pull-requests: write
 
 jobs:
   validate:
@@ -18,7 +18,7 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Clona todo o histórico para evitar erros
+          fetch-depth: 0
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
@@ -34,22 +34,20 @@ jobs:
 
   deploy:
     name: Deploy para GitHub Pages
-    needs: validate  # Só executa se o build for bem-sucedido
+    needs: validate
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
         with:
-          fetch-dept: 0
-
-      - name: Verificar o repositorio remoto
-        run: git remote -v
+          fetch-depth: 0
 
       - name: Configurar autenticação no GitHub
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global --add safe.directory $(pwd)
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Configurar Node.js
@@ -72,8 +70,8 @@ jobs:
 
   suggest_pull_request:
     name: Sugerir Pull Request
-    needs: validate  # Só executa se a validação passar
-    if: github.ref != 'refs/heads/main'  # Somente para branches diferentes de 'main'
+    needs: validate
+    if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Criar Pull Request automático
@@ -86,5 +84,4 @@ jobs:
           body: |
             Uma nova atualização foi enviada para `${{ github.ref_name }}` e passou na validação.
             Para aplicar as mudanças na `main`, revise e aprove este Pull Request.
-          draft: true  # PR será criado como rascunho
-
+          draft: true
