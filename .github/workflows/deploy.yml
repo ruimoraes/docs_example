@@ -31,5 +31,7 @@ jobs:
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/ruimoraes/docs_example.git
 
       - name: Deploy para GitHub Pages
+        env:
+          GIT_USER: ${{ github.actor }}
         run: npm run deploy
 
