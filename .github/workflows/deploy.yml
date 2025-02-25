@@ -1,9 +1,14 @@
-name: Deploy Docusaurus to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches:
       - main
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   deploy:
@@ -28,14 +33,11 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git remote rm origin
-          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Deploy para GitHub Pages
         env:
           GIT_USER: "x-access-token:${{ secrets.GITHUB_TOKEN }}"
-          USE_SSH: false  # Garante que o deploy não tente usar SSH
-        run: |
-          npm run deploy
-
+          USE_SSH: false
+        run: npm run deploy
 
