@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 const config: Config = {
   url: 'https://ruimoraes.github.io', // URL base do GitHub Pages
-  baseUrl: '/docs_example/', // Nome do repositório com barras
+  baseUrl: '/docs_example', // Nome do repositório com barras
   projectName: 'docs_example',
   organizationName: 'ruimoraes',
   trailingSlash: false,
