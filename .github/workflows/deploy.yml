@@ -74,14 +74,12 @@ jobs:
     if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Criar Pull Request automático
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          base: main
-          branch: ${{ github.ref_name }}
-          title: "🚀 Novo PR - Atualização na branch `${{ github.ref_name }}`"
-          body: |
-            Uma nova atualização foi enviada para `${{ github.ref_name }}` e passou na validação.
-            Para aplicar as mudanças na `main`, revise e aprove este Pull Request.
-          draft: true
+      - name: Criar Pull Request via API do GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_NAME="${{ github.ref_name }}"
+          PR_TITLE="🚀 Novo PR - Atualização na branch '${BRANCH_NAME}'"
+          PR_BODY="Uma nova atualização foi enviada para '${BRANCH_NAME}' e passou na validação.\n\nPara aplicar as mudanças na 'main', revise e aprove este Pull Request."
+
+          gh pr create --base main --head "$BRANCH_NAME" --title "$PR_TITLE" --body "$PR_BODY" --draft
